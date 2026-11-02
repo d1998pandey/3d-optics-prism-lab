@@ -51,7 +51,6 @@
     flex-direction: column;
   }
 
-  /* Header & 9 Navigation Tabs */
   header {
     background: var(--header-bg);
     border-bottom: 1px solid var(--panel-border);
@@ -127,7 +126,6 @@
     color: var(--accent);
   }
 
-  /* Main Workspace */
   .app-body {
     flex: 1;
     position: relative;
@@ -143,7 +141,6 @@
     z-index: 1;
   }
 
-  /* Clean Collapsible Sidebars & Bottom Graph Bar */
   .left-drawer {
     position: absolute;
     top: 0;
@@ -180,12 +177,13 @@
   }
   .right-drawer.closed { transform: translateX(100%); }
 
+  /* Improved Bottom Graph Drawer with explicit height & zero clipping */
   .bottom-drawer {
     position: absolute;
     left: 310px;
     right: 345px;
     bottom: 0;
-    height: 185px;
+    height: 220px;
     background: var(--panel-bg);
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--panel-border);
@@ -198,7 +196,6 @@
   .bottom-drawer.expand-left { left: 0; }
   .bottom-drawer.expand-right { right: 0; }
 
-  /* Drawer Handle Tabs */
   .drawer-tab-left {
     position: absolute;
     top: 45%;
@@ -243,7 +240,7 @@
 
   .drawer-tab-bottom {
     position: absolute;
-    bottom: 185px;
+    bottom: 220px;
     left: 50%;
     transform: translateX(-50%);
     background: var(--card-bg);
@@ -277,7 +274,6 @@
     align-items: center;
   }
 
-  /* Compact Sliders */
   .slider-row {
     display: flex;
     flex-direction: column;
@@ -325,7 +321,6 @@
     cursor: pointer;
   }
 
-  /* Clean Structured Data Tables (Replacing Cluttered Text) */
   .phys-table {
     width: 100%;
     border-collapse: collapse;
@@ -379,7 +374,6 @@
     border-radius: 0 4px 4px 0;
   }
 
-  /* Top Floating Camera & 2D Section Bar */
   .top-cam-bar {
     position: absolute;
     top: 10px;
@@ -397,21 +391,31 @@
     box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   }
 
-  /* Bottom Graph Layout */
+  /* Fixed Bottom Graph Layout so canvas never clips */
   .bottom-layout {
     flex: 1;
+    min-height: 0;
+    height: 100%;
     display: grid;
-    grid-template-columns: 230px 1fr;
-    gap: 10px;
-    padding: 8px 12px;
+    grid-template-columns: 235px 1fr;
+    gap: 12px;
+    padding: 10px 14px;
     overflow: hidden;
   }
-  #optics-graph-canvas {
+  .graph-wrapper {
+    position: relative;
     width: 100%;
     height: 100%;
+    min-height: 0;
     background: var(--card-bg);
     border: 1px solid var(--panel-border);
     border-radius: 6px;
+    overflow: hidden;
+  }
+  #optics-graph-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
     cursor: crosshair;
   }
 </style>
@@ -434,7 +438,6 @@
     </div>
   </div>
 
-  <!-- 9 Core Experiment Navigation Tabs -->
   <div class="nav-tabs">
     <button class="tab-btn active" id="tab-refraction" onclick="selectTab('refraction')">1. Refraction Explorer</button>
     <button class="tab-btn" id="tab-snell" onclick="selectTab('snell')">2. Snell's Law Lab</button>
@@ -449,7 +452,7 @@
 </header>
 
 <div class="app-body">
-  <!-- LEFT DRAWER: CLEAN MATERIAL PRESETS, COMPONENT INSPECTOR & VISIBILITY -->
+  <!-- LEFT DRAWER -->
   <aside class="left-drawer" id="left-drawer">
     <div class="panel-sec">
       <div class="sec-title"><span>Quick Material Presets</span></div>
@@ -473,7 +476,6 @@
       </select>
     </div>
 
-    <!-- Clean Visual Overlays -->
     <div class="panel-sec">
       <div class="sec-title"><span>Scene Overlays</span></div>
       <div class="chk-grid">
@@ -484,7 +486,6 @@
       </div>
     </div>
 
-    <!-- Interactive Component Inspector Table -->
     <div class="panel-sec" style="border-bottom:none;">
       <div class="sec-title"><span>Selected Component Inspector</span></div>
       <select id="sel-inspect" onchange="updateInspectorCard()">
@@ -503,12 +504,12 @@
   <!-- CENTER 3D APPARATUS CANVAS -->
   <main id="canvas-container"></main>
 
-  <!-- TOP FLOATING CAMERA & 2D PRINCIPAL SECTION TOOLBAR -->
+  <!-- TOP FLOATING CAMERA BAR -->
   <div class="top-cam-bar">
-    <button class="btn-sm active-toggle" id="btn-play- pulses" onclick="togglePulseAnim()">⏸ Pause Pulses</button>
+    <button class="btn-sm active-toggle" id="btn-play-pulses" onclick="togglePulseAnim()">⏸ Pause Pulses</button>
     <button class="btn-sm" id="btn-slowmo" onclick="toggleSlowMo()">🐢 Slow-Mo</button>
     <span style="color:#64748b;">|</span>
-    <button class="btn-sm" id="btn-2d-sec" onclick="setCameraView('front2d')">📐 2D Principal Section</button>
+    <button class="btn-sm" onclick="setCameraView('front2d')">📐 2D Principal Section</button>
     <button class="btn-sm" onclick="setCameraView('iso3d')">🧊 3D Isometric</button>
     <button class="btn-sm" onclick="setCameraView('top')">Top View</button>
     <button class="btn-sm" onclick="setCameraView('side')">Side View</button>
@@ -516,28 +517,27 @@
 
   <div class="drawer-tab-right" id="tab-right" onclick="toggleDrawer('right')">CONTROLS &amp; TABLE ▶</div>
 
-  <!-- RIGHT DRAWER: FOCUSED SLIDERS (MAX 3-4) + STRUCTURED NUMERICAL TABLE -->
+  <!-- RIGHT DRAWER -->
   <aside class="right-drawer" id="right-drawer">
-    <div class="panel-sec" id="focused-controls-sec">
-      <!-- Populated dynamically with only the 3-4 essential controls for the active tab -->
-    </div>
-
-    <div class="panel-sec" id="live-table-sec" style="border-bottom:none;">
-      <!-- Populated with clean structured HTML tables for Angles, Speeds, Wavelengths & Equations -->
-    </div>
+    <div class="panel-sec" id="focused-controls-sec"></div>
+    <div class="panel-sec" id="live-table-sec" style="border-bottom:none;"></div>
   </aside>
 
   <div class="drawer-tab-bottom" id="tab-bottom" onclick="toggleDrawer('bottom')">▼ LIVE PHYSICS GRAPH</div>
 
-  <!-- BOTTOM DRAWER: SYNCHRONIZED INTERACTIVE GRAPH -->
+  <!-- BOTTOM DRAWER: CRISP SCIENTIFIC GRAPH WITH AXES, GRID & METRIC TOGGLE -->
   <section class="bottom-drawer" id="bottom-drawer">
     <div class="bottom-layout">
       <div style="display:flex; flex-direction:column; justify-content:space-between;">
         <div>
           <div class="sec-title"><span id="graph-title-lbl">Live Plot: sin(i) vs sin(r)</span></div>
-          <p id="graph-desc-lbl" style="font-size:11px; color:var(--text-muted); line-height:1.4;">
-            Click anywhere on the curve to jump directly to that incident angle!
+          <p id="graph-desc-lbl" style="font-size:11px; color:var(--text-muted); line-height:1.4; margin-bottom:6px;">
+            Click anywhere on the graph to inspect or jump directly to that angle/wavelength!
           </p>
+          <div id="disp-graph-toggle" style="display:none; gap:4px; margin-bottom:6px;">
+            <button class="btn-sm active-toggle" id="btn-disp-n" style="flex:1; font-size:10.5px;" onclick="setDispGraphMode('n')">n(λ) vs λ</button>
+            <button class="btn-sm" id="btn-disp-d" style="flex:1; font-size:10.5px;" onclick="setDispGraphMode('delta')">Deviation δ(λ) vs λ</button>
+          </div>
         </div>
         <div id="step-by-step-box">
           <div class="slider-row" style="margin-bottom:2px;">
@@ -546,7 +546,9 @@
           </div>
         </div>
       </div>
-      <canvas id="optics-graph-canvas"></canvas>
+      <div class="graph-wrapper">
+        <canvas id="optics-graph-canvas"></canvas>
+      </div>
     </div>
   </section>
 </div>
@@ -556,7 +558,7 @@
    1. GLOBAL STATE & PUBLISHED SELLMEIER GLASS DATASETS
    ============================================================================ */
 const state = {
-  tab: 'refraction',       // 'refraction'|'snell'|'tir'|'slab'|'prism'|'mindev'|'dispersion'|'fibre'|'challenge'
+  tab: 'refraction',
   advancedMode: true,
   dayMode: false,
   running: true,
@@ -564,33 +566,25 @@ const state = {
   pulsePhase: 0,
   tracePct: 100,
 
-  // Core Optical Parameters (Kept focused & synchronized)
-  incAngleDeg: 40.0,       // Angle of incidence i (0° to 89°)
-  n1: 1.0003,              // Surrounding / First Medium index
-  n2: 1.5000,              // Element / Second Medium index
-  wavelengthNm: 550,       // Monochromatic source wavelength (nm)
+  incAngleDeg: 40.0,
+  n1: 1.0003,
+  n2: 1.5000,
+  wavelengthNm: 550,
 
-  // Glass Slab Specific
-  slabThickness: 3.2,      // Thickness t (cm)
+  slabThickness: 3.2,
+  apexAngleDeg: 60.0,
 
-  // Triangular Prism Specific
-  apexAngleDeg: 60.0,      // Prism Apex Angle A (15° to 85°)
+  glassModel: 'SF11',
+  dispExaggeration: 4.5,
+  dispGraphMode: 'n', // 'n' for Refractive Index n(λ) vs λ, 'delta' for Deviation δ(λ) vs λ
 
-  // Dispersion Specific
-  glassModel: 'SF11',      // 'BK7' | 'F2' | 'SF11' | 'FusedSilica'
-  dispExaggeration: 4.5,   // Visual angular spread multiplier for educational clarity
-
-  // Optical Fibre / TIR Application Sub-mode
-  tirAppType: 'fibre',     // 'fibre' | 'prism90' | 'prism180'
+  tirAppType: 'fibre',
   fibreCoreN: 1.55,
   fibreCladN: 1.42,
   fibreEntryDeg: 18.0,
 
-  // Guided / Challenge Mode
   lessonIdx: 0,
   quizScore: 0,
-
-  // Computed Physics Results (Shared between 3D Scene, Right Table, and Bottom Graph)
   lastResult: {}
 };
 
@@ -624,7 +618,6 @@ function evalSellmeierIndex(glassKey, lambdaNm) {
   return Math.sqrt(Math.max(1.0, n2));
 }
 
-// Calculate unpolarized Fresnel Reflectance R and Transmittance T (R + T = 1)
 function computeFresnelRT(n1, n2, iRad, rRad, isTIR) {
   if (isTIR) return { R: 1.0, T: 0.0, Rs: 1.0, Rp: 1.0 };
   const ci = Math.cos(iRad), cr = Math.cos(rRad);
@@ -637,27 +630,22 @@ function computeFresnelRT(n1, n2, iRad, rRad, isTIR) {
 }
 
 /* ============================================================================
-   2. EXACT GEOMETRICAL OPTICS SOLVERS (PLANE, SLAB, PRISM, MIN/MAX DEV, FIBRE)
+   2. EXACT GEOMETRICAL OPTICS SOLVERS
    ============================================================================ */
 function degToRad(d) { return (d * Math.PI) / 180; }
 function radToDeg(r) { return (r * 180) / Math.PI; }
 
-// Solve two-face prism passage for apex angle A_deg, incidence i_deg, surrounding n0, prism n
 function solvePrismRay(A_deg, i_deg, n0, n) {
   const A = degToRad(A_deg);
   const i = degToRad(i_deg);
 
-  // Face 1 Snell's Law: n0 sin(i) = n sin(r1)
   const sinR1 = (n0 / n) * Math.sin(i);
   if (Math.abs(sinR1) > 1.0) {
     return { validFace1: false };
   }
   const r1 = Math.asin(sinR1);
-
-  // Prism internal geometry: r1 + r2 = A  =>  r2 = A - r1
   const r2 = A - r1;
 
-  // Face 2 Snell's Law: n sin(r2) = n0 sin(e)
   const sinE = (n / n0) * Math.sin(r2);
   const critAngleRad = n > n0 ? Math.asin(n0 / n) : Math.PI / 2;
   const isTIR2 = sinE > 1.0 + 1e-7;
@@ -695,12 +683,10 @@ function solvePrismRay(A_deg, i_deg, n0, n) {
   };
 }
 
-// Compute exact Minimum Deviation and Grazing-Emergence Limiting Deviation for current Prism
 function computePrismLimits(A_deg, n0, n) {
   const A = degToRad(A_deg);
   const relN = n / n0;
 
-  // At symmetric minimum deviation: r1 = r2 = A/2 => sin(i_min) = (n/n0) sin(A/2)
   const sinImin = relN * Math.sin(A / 2);
   let minDevPossible = sinImin <= 1.0;
   let i_min_deg = NaN, delta_min_deg = NaN;
@@ -709,7 +695,6 @@ function computePrismLimits(A_deg, n0, n) {
     delta_min_deg = 2 * i_min_deg - A_deg;
   }
 
-  // Limiting grazing emergence (e -> 90°, r2 -> C): r1_limit = A - C
   const critRad = relN > 1 ? Math.asin(1 / relN) : Math.PI / 2;
   const r1_limit = A - critRad;
   let i_limit_deg = 0;
@@ -808,7 +793,6 @@ function clearGroup(grp) {
   }
 }
 
-// Draw a 3D Ray Segment with Directional Arrowhead & Animated Wavefront Pulses
 function addRaySegment3D(pStart, pEnd, colorHex, radius = 0.055, opacity = 1.0, dashed = false) {
   const dir = pEnd.clone().sub(pStart);
   const fullLen = dir.length();
@@ -832,7 +816,6 @@ function addRaySegment3D(pStart, pEnd, colorHex, radius = 0.055, opacity = 1.0, 
   mesh.position.copy(mid);
   raysGroup.add(mesh);
 
-  // Mid-segment directional cone arrowhead
   if (fullLen > 0.9) {
     const cone = new THREE.Mesh(new THREE.ConeGeometry(radius * 2.5, radius * 6.5, 14), mat);
     cone.quaternion.copy(quat);
@@ -840,7 +823,6 @@ function addRaySegment3D(pStart, pEnd, colorHex, radius = 0.055, opacity = 1.0, 
     raysGroup.add(cone);
   }
 
-  // Animated photon wavefront beads along ray
   if (state.running && opacity > 0.35) {
     const spacing = 1.6;
     const offset = (state.pulsePhase * 3.2) % spacing;
@@ -903,6 +885,8 @@ function updateExperiment() {
   clearGroup(labelsGroup);
 
   const tab = state.tab;
+  document.getElementById('disp-graph-toggle').style.display = tab === 'dispersion' ? 'flex' : 'none';
+
   if (tab === 'refraction' || tab === 'snell' || tab === 'tir') {
     buildPlaneInterfaceScene();
   } else if (tab === 'slab') {
@@ -919,13 +903,10 @@ function updateExperiment() {
   drawBottomGraph();
 }
 
-// 4A. Plane Interface (Refraction, Snell's Law & Critical Angle / TIR)
 function buildPlaneInterfaceScene() {
-  // In TIR tab, ensure default light enters from denser bottom medium (or swap n1/n2 if needed)
   const n1 = state.n1;
   const n2 = state.n2;
 
-  // Top Medium 1 Block (y > 0) and Bottom Medium 2 Block (y < 0)
   const block2Geo = new THREE.BoxGeometry(12, 4.5, 3.2);
   const block2Mat = new THREE.MeshPhongMaterial({
     color: 0x38bdf8,
@@ -949,7 +930,6 @@ function buildPlaneInterfaceScene() {
     apparatusGroup.add(mesh1);
   }
 
-  // Interface Boundary Plane at y = 0
   const planeLine = new THREE.Line(
     new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-6, 0, 1.61), new THREE.Vector3(6, 0, 1.61)]),
     new THREE.LineBasicMaterial({ color: 0x38bdf8 })
@@ -962,11 +942,9 @@ function buildPlaneInterfaceScene() {
   lMed2.position.set(-4.2, -3.6, 1.6);
   labelsGroup.add(lMed1, lMed2);
 
-  // Normal at (0,0,0)
   const origin = new THREE.Vector3(0, 0, 0);
   addNormalLine3D(origin, new THREE.Vector3(0, 1, 0), 4.0, 'Normal (N)');
 
-  // Snell's Law: n1 sin(i) = n2 sin(r)
   const iRad = degToRad(state.incAngleDeg);
   const sinR = (n1 / n2) * Math.sin(iRad);
   const critPossible = n1 > n2;
@@ -978,13 +956,11 @@ function buildPlaneInterfaceScene() {
   const rDeg = radToDeg(rRad);
   const fresnel = computeFresnelRT(n1, n2, iRad, rRad, isTIR || isAtCrit);
 
-  // Incident Ray from Top-Left (-L sin i, +L cos i, 0) to (0,0,0)
   const rayLen = 5.2;
   const incStart = new THREE.Vector3(-rayLen * Math.sin(iRad), rayLen * Math.cos(iRad), 0);
   addRaySegment3D(incStart, origin, 0xffbe0b, 0.06, 1.0);
   addAngleArc3D(origin, new THREE.Vector3(0, 1, 0), incStart.clone().normalize(), 1.5, 0xffbe0b, `i=${state.incAngleDeg.toFixed(1)}°`);
 
-  // Reflected Ray into Medium 1 (+L sin i, +L cos i, 0)
   const reflEnd = new THREE.Vector3(rayLen * Math.sin(iRad), rayLen * Math.cos(iRad), 0);
   if (isTIR) {
     addRaySegment3D(origin, reflEnd, 0xff4d6d, 0.065, 1.0);
@@ -994,7 +970,6 @@ function buildPlaneInterfaceScene() {
       const reflOp = document.getElementById('chk-fresnel').checked ? Math.max(0.2, fresnel.R) : 0.35;
       addRaySegment3D(origin, reflEnd, 0xffbe0b, 0.04, reflOp);
     }
-    // Refracted Ray into Medium 2 (+L sin r, -L cos r, 0)
     const refrEnd = new THREE.Vector3(rayLen * Math.sin(rRad), -rayLen * Math.cos(rRad), 0);
     const transOp = document.getElementById('chk-fresnel').checked ? Math.max(0.25, fresnel.T) : 1.0;
     addRaySegment3D(origin, refrEnd, isAtCrit ? 0xf59e0b : 0x00f59b, 0.06, transOp);
@@ -1016,13 +991,11 @@ function buildPlaneInterfaceScene() {
   };
 }
 
-// 4B. Rectangular Glass Slab & Lateral Displacement d = t sin(i - r) / cos(r)
 function buildGlassSlabScene() {
   const n1 = state.n1;
   const n2 = state.n2;
   const t = state.slabThickness;
 
-  // 3D Glass Slab centered at y = 0 (Top face at y = +t/2, Bottom face at y = -t/2)
   const slabGeo = new THREE.BoxGeometry(10, t, 3.0);
   const slabMat = new THREE.MeshPhongMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.3, shininess: 90 });
   apparatusGroup.add(new THREE.Mesh(slabGeo, slabMat));
@@ -1032,9 +1005,8 @@ function buildGlassSlabScene() {
   const iRad = degToRad(state.incAngleDeg);
   const sinR = (n1 / n2) * Math.sin(iRad);
   const rRad = Math.asin(Math.max(-1, Math.min(1, sinR)));
-  const eRad = iRad; // Parallel faces with identical surrounding medium n1
+  const eRad = iRad;
 
-  // Hit point 1 on Top Face: (-1.2, yTop, 0)
   const pHit1 = new THREE.Vector3(-1.2, yTop, 0);
   const pHit2 = new THREE.Vector3(-1.2 + t * Math.tan(rRad), yBot, 0);
 
@@ -1042,7 +1014,6 @@ function buildGlassSlabScene() {
   const pStart = new THREE.Vector3(pHit1.x - rayLen * Math.sin(iRad), pHit1.y + rayLen * Math.cos(iRad), 0);
   const pEmerg = new THREE.Vector3(pHit2.x + rayLen * Math.sin(eRad), pHit2.y - rayLen * Math.cos(eRad), 0);
 
-  // Unbent original incident direction extension (dashed) to show Lateral Displacement d
   const pUnbentEnd = new THREE.Vector3(pHit1.x + (t + rayLen * Math.cos(iRad)) * Math.tan(iRad), pEmerg.y, 0);
   addRaySegment3D(pHit1, pUnbentEnd, 0x94a3b8, 0.03, 0.7, true);
 
@@ -1057,7 +1028,6 @@ function buildGlassSlabScene() {
   addAngleArc3D(pHit1, new THREE.Vector3(0, -1, 0), pHit2.clone().sub(pHit1).normalize(), 1.2, 0x00d2ff, `r=${radToDeg(rRad).toFixed(1)}°`);
   addAngleArc3D(pHit2, new THREE.Vector3(0, -1, 0), pEmerg.clone().sub(pHit2).normalize(), 1.2, 0x00f59b, `e=${state.incAngleDeg.toFixed(1)}°`);
 
-  // Lateral Displacement d = t * sin(i - r) / cos(r) perpendicular segment
   const latShift = (t * Math.sin(iRad - rRad)) / Math.cos(rRad);
   const dirInc = new THREE.Vector3(Math.sin(iRad), -Math.cos(iRad), 0);
   const vecToHit2 = pHit2.clone().sub(pHit1);
@@ -1079,14 +1049,12 @@ function buildGlassSlabScene() {
   };
 }
 
-// 4C. 3D Triangular Prism (Refraction, Deviation δ, Min/Max Deviation, Second-Face TIR & Sellmeier Dispersion)
 function buildPrismScene(isDispersionMode) {
   const A_deg = state.apexAngleDeg;
   const A_rad = degToRad(A_deg);
   const sideLen = 6.2;
   const halfA = A_rad / 2;
 
-  // Apex at (0, H_top, 0); Left Base at (-X_b, Y_b, 0); Right Base at (+X_b, Y_b, 0)
   const H_top = 2.6;
   const X_b = sideLen * Math.sin(halfA);
   const Y_b = H_top - sideLen * Math.cos(halfA);
@@ -1109,7 +1077,6 @@ function buildPrismScene(isDispersionMode) {
   });
   apparatusGroup.add(new THREE.Mesh(prismGeo, prismMat));
 
-  // Wireframe edges for crisp principal section visibility
   const edgeGeo = new THREE.EdgesGeometry(prismGeo);
   apparatusGroup.add(new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.65 })));
 
@@ -1117,24 +1084,15 @@ function buildPrismScene(isDispersionMode) {
   lblApex.position.set(0, H_top + 0.55, 0);
   labelsGroup.add(lblApex);
 
-  // Face 1 (Left face from Apex(0, H_top) to (-X_b, Y_b)):
-  // Outward unit normal n_out1 = (-cos(A/2), +sin(A/2), 0); Inward normal n_in1 = (+cos(A/2), -sin(A/2), 0)
   const nOut1 = new THREE.Vector3(-Math.cos(halfA), Math.sin(halfA), 0);
   const nIn1 = nOut1.clone().negate();
-
-  // Face 2 (Right face from Apex(0, H_top) to (+X_b, Y_b)):
-  // Outward unit normal n_out2 = (+cos(A/2), +sin(A/2), 0)
   const nOut2 = new THREE.Vector3(Math.cos(halfA), Math.sin(halfA), 0);
   const nIn2 = nOut2.clone().negate();
 
-  // Hit point P1 halfway down Left Face
   const s1 = sideLen * 0.46;
   const P1 = new THREE.Vector3(-s1 * Math.sin(halfA), H_top - s1 * Math.cos(halfA), 0);
   addNormalLine3D(P1, nOut1, 2.5, 'N₁');
 
-  // Incident ray arriving at angle i counterclockwise from outward normal nOut1:
-  // Wait: standard prism ray comes from bottom-left (angle i below nOut1).
-  // Vector from P1 to source = rotate nOut1 counterclockwise by +iRad:
   const iRad = degToRad(state.incAngleDeg);
   const rotZ = (vec, ang) => new THREE.Vector3(
     vec.x * Math.cos(ang) - vec.y * Math.sin(ang),
@@ -1145,21 +1103,16 @@ function buildPrismScene(isDispersionMode) {
   const P_source = P1.clone().addScaledVector(toSourceDir, 4.6);
 
   if (!isDispersionMode) {
-    // Monochromatic Ray Trace
     const sol = solvePrismRay(A_deg, state.incAngleDeg, state.n1, state.n2);
     const limits = computePrismLimits(A_deg, state.n1, state.n2);
 
-    // Step 1: Incident Ray
     addRaySegment3D(P_source, P1, 0xffbe0b, 0.06, 1.0);
     addAngleArc3D(P1, nOut1, toSourceDir, 1.25, 0xffbe0b, `i=${state.incAngleDeg.toFixed(1)}°`);
 
     if (sol.validFace1 && state.tracePct > 30) {
-      // Internal ray direction: rotate inward normal nIn1 by +r1_rad
       const r1Rad = degToRad(sol.r1_deg);
       const internalDir = rotZ(nIn1, r1Rad).normalize();
 
-      // Intersect internal ray P(t) = P1 + t * internalDir with Right Face 2 (Apex(0,H_top) to (+X_b, Y_b))
-      // Right face satisfies nOut2 · (P - Apex) = 0
       const apexPt = new THREE.Vector3(0, H_top, 0);
       const denom = nOut2.dot(internalDir);
       const tHit2 = apexPt.clone().sub(P1).dot(nOut2) / Math.max(1e-6, denom);
@@ -1170,21 +1123,17 @@ function buildPrismScene(isDispersionMode) {
 
       if (state.tracePct > 65) {
         if (sol.emerges) {
-          // Emergent ray bends away from normal nOut2 by angle e below nOut2 (rotate nOut2 by -e_rad)
           const eRad = degToRad(sol.e_deg);
           const emergDir = rotZ(nOut2, -eRad).normalize();
           const P_emerg = P2.clone().addScaledVector(emergDir, 4.8);
           addRaySegment3D(P2, P_emerg, 0x00f59b, 0.06, 1.0);
           addAngleArc3D(P2, nOut2, emergDir, 1.25, 0x00f59b, `e=${sol.e_deg.toFixed(1)}°`);
 
-          // Forward extension of Incident Ray & Backward extension of Emergent Ray to show Deviation Angle δ
           const incDir = P1.clone().sub(P_source).normalize();
           addRaySegment3D(P1, P1.clone().addScaledVector(incDir, 3.8), 0xffbe0b, 0.03, 0.6, true);
           addRaySegment3D(P2, P2.clone().addScaledVector(emergDir, -2.5), 0x00f59b, 0.03, 0.6, true);
         } else if (sol.isTIR2) {
-          // Total Internal Reflection at Face 2! Reflect internalDir across nIn2:
           const reflDir = internalDir.clone().sub(nIn2.clone().multiplyScalar(2 * internalDir.dot(nIn2))).normalize();
-          // Intersect reflected ray with Base y = Y_b
           const tBase = Math.abs(reflDir.y) > 1e-4 ? (Y_b - P2.y) / reflDir.y : 2.5;
           const P_base = P2.clone().addScaledVector(reflDir, Math.max(0.5, Math.min(4.5, tBase)));
           addRaySegment3D(P2, P_base, 0xff4d6d, 0.065, 1.0);
@@ -1197,7 +1146,6 @@ function buildPrismScene(isDispersionMode) {
 
     state.lastResult = { type: 'prism', ...sol, limits };
   } else {
-    // EXPERIMENT 7: DISPERSION OF WHITE LIGHT INTO 7 SPECTRAL BANDS (SELLMEIER MODEL)
     addRaySegment3D(P_source, P1, 0xffffff, 0.075, 1.0);
     const lblW = makeTextSprite('White Light Beam', '#ffffff', 0.8);
     lblW.position.copy(P_source.clone().add(new THREE.Vector3(0, 0.6, 0)));
@@ -1219,7 +1167,6 @@ function buildPrismScene(isDispersionMode) {
 
     bands.forEach(b => {
       const nReal = evalSellmeierIndex(state.glassModel, b.lam);
-      // Apply educational dispersion exaggeration strictly to visual ray fan while keeping quantitative table exact
       const nVis = nRed + (nReal - nRed) * state.dispExaggeration;
       const solReal = solvePrismRay(A_deg, state.incAngleDeg, state.n1, nReal);
       const solVis = solvePrismRay(A_deg, state.incAngleDeg, state.n1, nVis);
@@ -1251,7 +1198,6 @@ function buildPrismScene(isDispersionMode) {
   }
 }
 
-// 4D. Experiment 8: Optical Fibre & Right-Angle Reflecting Prisms (90° Periscope & 180° Retroreflector)
 function buildFibreAndTIRPrismsScene() {
   if (state.tirAppType === 'fibre') {
     const nCore = state.fibreCoreN;
@@ -1259,7 +1205,6 @@ function buildFibreAndTIRPrismsScene() {
     const critDeg = nCore > nClad ? radToDeg(Math.asin(nClad / nCore)) : NaN;
     const NA = nCore > nClad ? Math.sqrt(nCore * nCore - nClad * nClad) : 0;
 
-    // 3D Cylindrical Core & Cladding Shell along X from -6 to +6
     const coreGeo = new THREE.CylinderGeometry(1.1, 1.1, 12, 32);
     coreGeo.rotateZ(Math.PI / 2);
     apparatusGroup.add(new THREE.Mesh(coreGeo, new THREE.MeshPhongMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.32 })));
@@ -1268,11 +1213,9 @@ function buildFibreAndTIRPrismsScene() {
     cladGeo.rotateZ(Math.PI / 2);
     apparatusGroup.add(new THREE.Mesh(cladGeo, new THREE.MeshPhongMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.14, wireframe: true })));
 
-    // Snell's Law at Entrance Face x = -6 (normal along -X): 1.0 * sin(theta_in) = nCore * sin(theta_r)
     const inRad = degToRad(state.fibreEntryDeg);
     const sinInside = Math.sin(inRad) / nCore;
     const insideAngleRad = Math.asin(Math.max(-1, Math.min(1, sinInside)));
-    // Incidence angle on horizontal core-cladding wall is i_wall = 90° - insideAngleDeg
     const wallIncDeg = 90 - radToDeg(insideAngleRad);
     const guidedByTIR = nCore > nClad && wallIncDeg > critDeg;
 
@@ -1280,10 +1223,8 @@ function buildFibreAndTIRPrismsScene() {
     const pSrc = new THREE.Vector3(-9.2, -3.2 * Math.sin(inRad), 0);
     addRaySegment3D(pSrc, pEntry, 0xffbe0b, 0.06, 1.0);
 
-    // Trace multiple bounces from x = -6 to x = +6 inside y in [-1.1, +1.1]
     let curX = -6, curY = 0;
     let slope = Math.tan(insideAngleRad);
-    const stepDx = Math.abs(slope) > 1e-3 ? (1.1 / Math.abs(slope)) : 12;
 
     while (curX < 6) {
       const nextWallY = slope > 0 ? 1.1 : -1.1;
@@ -1300,7 +1241,6 @@ function buildFibreAndTIRPrismsScene() {
         const pHit = new THREE.Vector3(hitX, nextWallY, 0);
         addRaySegment3D(new THREE.Vector3(curX, curY, 0), pHit, guidedByTIR ? 0x00f59b : 0xff4d6d, 0.055, 1.0);
         if (!guidedByTIR) {
-          // Leak ray into cladding
           addRaySegment3D(pHit, new THREE.Vector3(hitX + 2.0, nextWallY * 2.2, 0), 0xff4d6d, 0.04, 0.65);
         }
         curX = hitX;
@@ -1315,7 +1255,6 @@ function buildFibreAndTIRPrismsScene() {
       wallIncDeg, guidedByTIR
     };
   } else {
-    // Right-Angle Glass Prism (n = 1.52, Critical angle C ≈ 41.1°, Incidence on 45° hypotenuse is 45° > C => 100% TIR!)
     const shape = new THREE.Shape();
     shape.moveTo(-2.5, -2.5);
     shape.lineTo(-2.5, 2.5);
@@ -1326,7 +1265,6 @@ function buildFibreAndTIRPrismsScene() {
     apparatusGroup.add(new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.3 })));
     apparatusGroup.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color: 0x38bdf8 })));
 
-    // 90° Periscope turn: enters left vertical face at (-2.5, 0, 0), hits hypotenuse at (0, 0, 0) at i = 45° > 41.8°, reflects straight down!
     const pSrc = new THREE.Vector3(-6, 0, 0);
     const pIn = new THREE.Vector3(-2.5, 0, 0);
     const pHyp = new THREE.Vector3(0, 0, 0);
@@ -1355,7 +1293,6 @@ function selectTab(tab) {
   const btn = document.getElementById(`tab-${tab}`);
   if (btn) btn.classList.add('active');
 
-  // Sensible defaults for Critical Angle & TIR tab (denser n1 = 1.50 to rarer n2 = 1.00)
   if (tab === 'tir' && state.n1 <= state.n2) {
     state.n1 = 1.50;
     state.n2 = 1.0003;
@@ -1379,7 +1316,7 @@ function buildFocusedRightControls() {
     const critVal = critPossible ? radToDeg(Math.asin(state.n2 / state.n1)) : null;
 
     sec.innerHTML = `
-      <div class="sec-title"><span>Essential Controls (Max 3 Sliders)</span></div>
+      <div class="sec-title"><span>Essential Controls (3 Sliders)</span></div>
       <div class="slider-row">
         <div class="slider-head"><span>Angle of Incidence (i)</span><span class="val" id="lbl-i-val">${state.incAngleDeg.toFixed(1)}°</span></div>
         <input type="range" min="0" max="89" step="0.2" value="${state.incAngleDeg}" oninput="state.incAngleDeg=parseFloat(this.value); document.getElementById('lbl-i-val').textContent=state.incAngleDeg.toFixed(1)+'°'; updateExperiment()">
@@ -1500,7 +1437,6 @@ function buildFocusedRightControls() {
   }
 }
 
-// Populate the Clean Structured Live Table in the Right Drawer
 function buildRightLiveTable() {
   const box = document.getElementById('live-table-sec');
   const res = state.lastResult;
@@ -1601,13 +1537,22 @@ function buildRightLiveTable() {
 }
 
 /* ============================================================================
-   6. SYNCHRONIZED INTERACTIVE BOTTOM GRAPH (CLICK TO JUMP TO ANGLE)
+   6. HIGH-CONTRAST SCIENTIFIC BOTTOM GRAPH (FULL GRID, AXES, AUTO-SCALE)
    ============================================================================ */
+function setDispGraphMode(m) {
+  state.dispGraphMode = m;
+  document.getElementById('btn-disp-n').classList.toggle('active-toggle', m === 'n');
+  document.getElementById('btn-disp-d').classList.toggle('active-toggle', m === 'delta');
+  drawBottomGraph();
+}
+
 function drawBottomGraph() {
   const canvas = document.getElementById('optics-graph-canvas');
   if (!canvas) return;
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (w < 20 || h < 20) return;
+
   if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) {
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
@@ -1616,113 +1561,203 @@ function drawBottomGraph() {
   ctx.save();
   ctx.scale(dpr, dpr);
 
-  ctx.fillStyle = state.dayMode ? '#f8fafc' : '#080d18';
+  const isDay = state.dayMode;
+  ctx.fillStyle = isDay ? '#f8fafc' : '#080d18';
   ctx.fillRect(0, 0, w, h);
 
-  const padL = 46, padR = 20, padT = 22, padB = 26;
+  // Generous padding so X and Y axis tick numbers & labels never clip
+  const padL = 56, padR = 26, padT = 22, padB = 32;
   const pw = w - padL - padR, ph = h - padT - padB;
 
-  ctx.strokeStyle = state.dayMode ? '#cbd5e1' : '#1e2d4a';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(padL, padT, pw, ph);
+  const drawGridAndAxes = (xMin, xMax, xStep, yMin, yMax, yDecimals, xUnit = '', yUnit = '') => {
+    ctx.font = '10.5px JetBrains Mono, monospace';
+    ctx.lineWidth = 1;
+
+    // Horizontal grid lines & Y-axis labels
+    const yTicks = 4;
+    for (let k = 0; k <= yTicks; k++) {
+      const frac = k / yTicks;
+      const yVal = yMin + frac * (yMax - yMin);
+      const sy = Math.round(padT + ph - frac * ph) + 0.5;
+      ctx.strokeStyle = isDay ? '#e2e8f0' : '#162238';
+      ctx.beginPath(); ctx.moveTo(padL, sy); ctx.lineTo(padL + pw, sy); ctx.stroke();
+
+      ctx.fillStyle = isDay ? '#475569' : '#94a3b8';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(yVal.toFixed(yDecimals) + yUnit, padL - 6, sy);
+    }
+
+    // Vertical grid lines & X-axis labels
+    for (let xv = xMin; xv <= xMax + 1e-5; xv += xStep) {
+      const frac = (xv - xMin) / (xMax - xMin);
+      const sx = Math.round(padL + frac * pw) + 0.5;
+      ctx.strokeStyle = isDay ? '#e2e8f0' : '#162238';
+      ctx.beginPath(); ctx.moveTo(sx, padT); ctx.lineTo(sx, padT + ph); ctx.stroke();
+
+      ctx.fillStyle = isDay ? '#475569' : '#94a3b8';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText((xStep < 1 ? xv.toFixed(1) : xv.toFixed(0)) + xUnit, sx, padT + ph + 6);
+    }
+
+    // Crisp outer border
+    ctx.strokeStyle = isDay ? '#94a3b8' : '#2e446e';
+    ctx.lineWidth = 1.4;
+    ctx.strokeRect(padL, padT, pw, ph);
+  };
 
   const tab = state.tab;
   const titleEl = document.getElementById('graph-title-lbl');
 
   if (tab === 'prism' || tab === 'mindev' || tab === 'challenge') {
-    // Plot Deviation δ vs Incidence Angle i (0° to 90°) + Highlight δ_min and TIR boundary
-    titleEl.textContent = 'Prism Curve: Deviation δ vs. Incidence Angle i';
+    titleEl.textContent = 'Prism Curve: Deviation δ (°) vs. Incidence Angle i (°)';
     const limits = computePrismLimits(state.apexAngleDeg, state.n1, state.n2);
 
-    // Shade invalid TIR region (i < i_limit_deg)
-    if (limits.i_limit_deg > 0.5) {
-      const xLim = padL + (limits.i_limit_deg / 90) * pw;
-      ctx.fillStyle = 'rgba(255, 77, 109, 0.14)';
-      ctx.fillRect(padL, padT, xLim - padL, ph);
-      ctx.fillStyle = '#ff4d6d';
-      ctx.font = '10px JetBrains Mono, monospace';
-      ctx.fillText(`2nd-Face TIR (i < ${limits.i_limit_deg.toFixed(1)}°)`, padL + 6, padT + 14);
-    }
-
-    ctx.strokeStyle = '#00d2ff';
-    ctx.lineWidth = 2.2;
-    ctx.beginPath();
-    let pen = false;
+    // Dynamically compute min and max valid δ for clean auto-scaling
+    let dMin = Infinity, dMax = -Infinity;
+    const samples = [];
     for (let iDeg = 1; iDeg <= 89.5; iDeg += 0.5) {
       const s = solvePrismRay(state.apexAngleDeg, iDeg, state.n1, state.n2);
       if (s.validFace1 && s.emerges) {
-        const sx = padL + (iDeg / 90) * pw;
-        const sy = padT + ph - ((s.delta_deg - 10) / 75) * ph;
-        if (!pen) { ctx.moveTo(sx, sy); pen = true; }
-        else ctx.lineTo(sx, sy);
-      } else {
-        pen = false;
+        samples.push({ i: iDeg, d: s.delta_deg });
+        if (s.delta_deg < dMin) dMin = s.delta_deg;
+        if (s.delta_deg > dMax) dMax = s.delta_deg;
       }
     }
-    ctx.stroke();
+    if (!isFinite(dMin)) { dMin = 15; dMax = 75; }
+    const yLo = Math.max(0, Math.floor(dMin - 5));
+    const yHi = Math.ceil(dMax + 6);
 
-    // Highlight Minimum Deviation Point (i_min, delta_min)
-    if (limits.minDevPossible) {
-      const mx = padL + (limits.i_min_deg / 90) * pw;
-      const my = padT + ph - ((limits.delta_min_deg - 10) / 75) * ph;
-      ctx.fillStyle = '#00f59b';
-      ctx.beginPath(); ctx.arc(mx, my, 5, 0, Math.PI * 2); ctx.fill();
+    drawGridAndAxes(0, 90, 15, yLo, yHi, 0, '°', '°');
+
+    if (limits.i_limit_deg > 0.5) {
+      const xLim = padL + (limits.i_limit_deg / 90) * pw;
+      ctx.fillStyle = 'rgba(255, 77, 109, 0.14)';
+      ctx.fillRect(padL, padT, Math.min(pw, xLim - padL), ph);
+      ctx.fillStyle = '#ff4d6d';
       ctx.font = 'bold 10.5px JetBrains Mono, monospace';
-      ctx.fillText(`δ_min = ${limits.delta_min_deg.toFixed(1)}° (i=e=${limits.i_min_deg.toFixed(1)}°)`, mx + 8, my + 4);
+      ctx.textAlign = 'left';
+      ctx.fillText(`2nd-Face TIR (i < ${limits.i_limit_deg.toFixed(1)}°)`, padL + 6, padT + 12);
     }
 
-    // Current Operating Point
+    ctx.strokeStyle = '#00d2ff';
+    ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    samples.forEach((pt, idx) => {
+      const sx = padL + (pt.i / 90) * pw;
+      const sy = padT + ph - ((pt.d - yLo) / Math.max(1, yHi - yLo)) * ph;
+      if (idx === 0) ctx.moveTo(sx, sy);
+      else ctx.lineTo(sx, sy);
+    });
+    ctx.stroke();
+
+    if (limits.minDevPossible) {
+      const mx = padL + (limits.i_min_deg / 90) * pw;
+      const my = padT + ph - ((limits.delta_min_deg - yLo) / Math.max(1, yHi - yLo)) * ph;
+      ctx.fillStyle = '#00f59b';
+      ctx.beginPath(); ctx.arc(mx, my, 5.5, 0, Math.PI * 2); ctx.fill();
+      ctx.font = 'bold 11px JetBrains Mono, monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`δ_min = ${limits.delta_min_deg.toFixed(1)}° (at i=${limits.i_min_deg.toFixed(1)}°)`, Math.min(padL + pw - 190, mx + 8), Math.max(padT + 14, my - 8));
+    }
+
     const cur = state.lastResult;
     if (cur && cur.emerges) {
       const cx = padL + (cur.i_deg / 90) * pw;
-      const cy = padT + ph - ((cur.delta_deg - 10) / 75) * ph;
+      const cy = padT + ph - ((cur.delta_deg - yLo) / Math.max(1, yHi - yLo)) * ph;
       ctx.fillStyle = '#ffbe0b';
-      ctx.beginPath(); ctx.arc(cx, cy, 5.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
     }
   } else if (tab === 'dispersion') {
-    // Plot Sellmeier Refractive Index n(λ) vs Wavelength λ (380 nm to 700 nm)
-    titleEl.textContent = `Sellmeier Dispersion: n(λ) vs. Wavelength λ (${state.glassModel})`;
-    const nMin = evalSellmeierIndex(state.glassModel, 700) - 0.005;
-    const nMax = evalSellmeierIndex(state.glassModel, 380) + 0.005;
+    const plotDelta = state.dispGraphMode === 'delta';
+    titleEl.textContent = plotDelta
+      ? `Sellmeier Angular Deviation δ(λ) vs. Wavelength λ (${state.glassModel})`
+      : `Sellmeier Refractive Index n(λ) vs. Wavelength λ (${state.glassModel})`;
 
-    ctx.strokeStyle = '#a855f7';
-    ctx.lineWidth = 2.4;
-    ctx.beginPath();
+    const pts = [];
+    let yMin = Infinity, yMax = -Infinity;
     for (let lam = 380; lam <= 700; lam += 4) {
       const nVal = evalSellmeierIndex(state.glassModel, lam);
-      const sx = padL + ((lam - 380) / 320) * pw;
-      const sy = padT + ph - ((nVal - nMin) / (nMax - nMin)) * ph;
-      if (lam === 380) ctx.moveTo(sx, sy);
-      else ctx.lineTo(sx, sy);
+      let yVal = nVal;
+      if (plotDelta) {
+        const s = solvePrismRay(state.apexAngleDeg, state.incAngleDeg, state.n1, nVal);
+        yVal = s.emerges ? s.delta_deg : NaN;
+      }
+      if (!isNaN(yVal)) {
+        pts.push({ lam, yVal, nVal });
+        if (yVal < yMin) yMin = yVal;
+        if (yVal > yMax) yMax = yVal;
+      }
     }
+    if (!isFinite(yMin)) { yMin = 1.5; yMax = 1.8; }
+    const padRange = Math.max(1e-4, (yMax - yMin) * 0.18);
+    const yLo = yMin - padRange;
+    const yHi = yMax + padRange;
+
+    drawGridAndAxes(380, 700, 40, yLo, yHi, plotDelta ? 1 : 3, 'nm', plotDelta ? '°' : '');
+
+    // Draw Rainbow-Gradient Dispersion Curve across 380nm - 700nm
+    const grad = ctx.createLinearGradient(padL, 0, padL + pw, 0);
+    grad.addColorStop(0.0, '#d500f9'); // Violet 380nm
+    grad.addColorStop(0.25, '#00b0ff'); // Blue
+    grad.addColorStop(0.5, '#00e676'); // Green
+    grad.addColorStop(0.7, '#ffea00'); // Yellow
+    grad.addColorStop(1.0, '#ff2a2a'); // Red 700nm
+
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    pts.forEach((p, idx) => {
+      const sx = padL + ((p.lam - 380) / 320) * pw;
+      const sy = padT + ph - ((p.yVal - yLo) / (yHi - yLo)) * ph;
+      if (idx === 0) ctx.moveTo(sx, sy);
+      else ctx.lineTo(sx, sy);
+    });
     ctx.stroke();
 
-    // Mark Violet (400 nm) and Red (680 nm)
-    [
-      { lam: 400, col: '#d500f9', lbl: 'Violet (400nm)' },
-      { lam: 680, col: '#ff2a2a', lbl: 'Red (680nm)' }
-    ].forEach(pt => {
-      const nVal = evalSellmeierIndex(state.glassModel, pt.lam);
-      const sx = padL + ((pt.lam - 380) / 320) * pw;
-      const sy = padT + ph - ((nVal - nMin) / (nMax - nMin)) * ph;
-      ctx.fillStyle = pt.col;
-      ctx.beginPath(); ctx.arc(sx, sy, 5, 0, Math.PI * 2); ctx.fill();
-      ctx.font = 'bold 10.5px JetBrains Mono, monospace';
-      ctx.fillText(`${pt.lbl}: n=${nVal.toFixed(4)}`, sx + 8, sy);
-    });
+    // Plot all 7 spectral band markers clearly inside the padded graph area
+    if (state.lastResult && state.lastResult.bands) {
+      state.lastResult.bands.forEach(b => {
+        const yVal = plotDelta ? b.solReal.delta_deg : b.nReal;
+        if (isNaN(yVal)) return;
+        const sx = padL + ((b.lam - 380) / 320) * pw;
+        const sy = padT + ph - ((yVal - yLo) / (yHi - yLo)) * ph;
+        const hex = '#' + b.col.toString(16).padStart(6, '0');
+        ctx.fillStyle = hex;
+        ctx.beginPath(); ctx.arc(sx, sy, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = isDay ? '#fff' : '#080d18'; ctx.lineWidth = 1.5; ctx.stroke();
+
+        if (b.name === 'Violet' || b.name === 'Green' || b.name === 'Red') {
+          ctx.fillStyle = hex;
+          ctx.font = 'bold 10.5px JetBrains Mono, monospace';
+          ctx.textAlign = b.name === 'Red' ? 'right' : 'left';
+          const offsetX = b.name === 'Red' ? -8 : 8;
+          const offsetY = b.name === 'Violet' ? 12 : -8;
+          ctx.fillText(
+            `${b.name} (${b.lam}nm): ${plotDelta ? yVal.toFixed(2) + '°' : 'n=' + yVal.toFixed(4)}`,
+            sx + offsetX,
+            Math.max(padT + 12, Math.min(padT + ph - 8, sy + offsetY))
+          );
+        }
+      });
+    }
   } else {
-    // Plot Snell's Law Linear Graph: sin(i) vs sin(r) with slope = n2 / n1
-    titleEl.textContent = `Snell's Law Verification: sin(i) vs. sin(r) [Slope = n₂/n₁ = ${(state.n2/state.n1).toFixed(3)}]`;
+    titleEl.textContent = `Snell's Law Plot: sin(i) vs. sin(r) [Slope = n₂/n₁ = ${(state.n2/state.n1).toFixed(3)}]`;
+    drawGridAndAxes(0, 1.0, 0.2, 0, 1.0, 2, '', '');
+
     ctx.strokeStyle = '#00f59b';
-    ctx.lineWidth = 2.2;
+    ctx.lineWidth = 2.6;
     ctx.beginPath();
-    for (let iDeg = 0; iDeg <= 89; iDeg += 1) {
+    let started = false;
+    for (let iDeg = 0; iDeg <= 89.5; iDeg += 0.5) {
       const sI = Math.sin(degToRad(iDeg));
       const sR = (state.n1 / state.n2) * sI;
       if (sR <= 1.0) {
         const sx = padL + sR * pw;
         const sy = padT + ph - sI * ph;
-        if (iDeg === 0) ctx.moveTo(sx, sy);
+        if (!started) { ctx.moveTo(sx, sy); started = true; }
         else ctx.lineTo(sx, sy);
       }
     }
@@ -1734,7 +1769,10 @@ function drawBottomGraph() {
       const cx = padL + curSR * pw;
       const cy = padT + ph - curSI * ph;
       ctx.fillStyle = '#ffbe0b';
-      ctx.beginPath(); ctx.arc(cx, cy, 5.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.font = 'bold 11px JetBrains Mono, monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`(sin r=${curSR.toFixed(2)}, sin i=${curSI.toFixed(2)})`, Math.min(padL + pw - 175, cx + 8), Math.max(padT + 14, cy - 8));
     }
   }
 
@@ -1746,11 +1784,17 @@ function initGraphClickHandler() {
   canvas.addEventListener('pointerdown', e => {
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const padL = 46, padR = 20;
+    const padL = 56, padR = 26;
     const pw = canvas.clientWidth - padL - padR;
     const frac = Math.max(0, Math.min(1, (x - padL) / pw));
     if (state.tab === 'prism' || state.tab === 'mindev') {
       state.incAngleDeg = Math.max(5, Math.min(89, frac * 90));
+      buildFocusedRightControls();
+      updateExperiment();
+    } else if (state.tab === 'refraction' || state.tab === 'snell' || state.tab === 'tir' || state.tab === 'slab') {
+      const targetSinR = frac;
+      const targetSinI = Math.min(0.999, (state.n2 / state.n1) * targetSinR);
+      state.incAngleDeg = radToDeg(Math.asin(targetSinI));
       buildFocusedRightControls();
       updateExperiment();
     }
@@ -1852,7 +1896,7 @@ function toggleDayNight() {
 
 function togglePulseAnim() {
   state.running = !state.running;
-  const btn = document.getElementById('btn-play- pulses');
+  const btn = document.getElementById('btn-play-pulses');
   btn.textContent = state.running ? '⏸ Pause Pulses' : '▶ Play Pulses';
   btn.classList.toggle('active-toggle', state.running);
 }
@@ -1872,7 +1916,6 @@ function resetCurrentTab() {
   selectTab(state.tab);
 }
 
-/* Drawer Toggles */
 let lOpen = true, rOpen = true, bOpen = true;
 function toggleDrawer(which) {
   if (which === 'left') {
